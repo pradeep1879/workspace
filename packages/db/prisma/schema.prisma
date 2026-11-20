@@ -1,0 +1,227 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum PagePermissionLevel {
+  VIEW
+  COMMENT
+  EDIT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sessions         Session[]
+  ownedWorkspaces  Workspace[]       @relation("WorkspaceOwner")
+  memberships      WorkspaceMember[]
+  createdPages     Page[]            @relation("PageCreator")
+  pagePermissions  PagePermission[]
+  comments         Comment[]
+  commentReplies   CommentReply[]
+  createdSnapshots DocumentSnapshot[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("sessions")
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner       User              @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  members     WorkspaceMember[]
+  pages       Page[]
+  invitations Invitation[]
+
+  @@index([ownerId])
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String        @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole @default(MEMBER)
+  joinedAt    DateTime      @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([workspaceId])
+  @@index([userId])
+  @@map("workspace_members")
+}
+
+model Page {
+  id          String   @id @default(cuid())
+  workspaceId String
+  parentId    String?
+  creatorId   String
+  title       String   @default("Untitled")
+  icon        String?
+  position    Float    @default(0)
+  isArchived  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace     Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creator       User               @relation("PageCreator", fields: [creatorId], references: [id], onDelete: Restrict)
+  parentPage    Page?              @relation("PageHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  childPages    Page[]             @relation("PageHierarchy")
+  permissions   PagePermission[]
+  documentState DocumentState?
+  updates       DocumentUpdate[]
+  comments      Comment[]
+  snapshots     DocumentSnapshot[]
+
+  @@index([workspaceId, parentId])
+  @@index([workspaceId, position])
+  @@index([workspaceId, isArchived])
+  @@map("pages")
+}
+
+model PagePermission {
+  id         String              @id @default(cuid())
+  pageId     String
+  userId     String
+  permission PagePermissionLevel
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pageId, userId])
+  @@index([pageId])
+  @@index([userId])
+  @@map("page_permissions")
+}
+
+model DocumentState {
+  id        String   @id @default(cuid())
+  pageId    String   @unique
+  state     Bytes
+  version   Int      @default(1)
+  updatedAt DateTime @updatedAt
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@map("document_states")
+}
+
+model DocumentUpdate {
+  id        String   @id @default(cuid())
+  pageId    String
+  update    Bytes
+  actorId   String?
+  sequence  Int
+  createdAt DateTime @default(now())
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, sequence])
+  @@map("document_updates")
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  pageId      String
+  authorId    String
+  content     String
+  anchorFrom  Int?
+  anchorTo    Int?
+  anchorText  String?
+  isResolved  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  page    Page           @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  author  User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  replies CommentReply[]
+
+  @@index([pageId, createdAt])
+  @@index([authorId])
+  @@map("comments")
+}
+
+model CommentReply {
+  id        String   @id @default(cuid())
+  commentId String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  author  User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([commentId, createdAt])
+  @@map("comment_replies")
+}
+
+model DocumentSnapshot {
+  id        String   @id @default(cuid())
+  pageId    String
+  creatorId String
+  label     String?
+  state     Bytes
+  preview   String?
+  createdAt DateTime @default(now())
+
+  page    Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  creator User @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, createdAt])
+  @@map("document_snapshots")
+}
+
+model Invitation {
+  id          String        @id @default(cuid())
+  workspaceId String
+  email       String
+  role        WorkspaceRole @default(MEMBER)
+  tokenHash   String        @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime      @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, email])
+  @@index([tokenHash])
+  @@map("invitations")
+}

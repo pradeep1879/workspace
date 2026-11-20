@@ -1,0 +1,37 @@
+{
+  "name": "collaborative-workspace-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production-minded real-time collaborative workspace",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run --workspaces --if-present build",
+    "typecheck": "npm run --workspaces --if-present typecheck",
+    "test": "npm run --workspaces --if-present test",
+    "lint": "eslint apps packages",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md}\"",
+    "db:generate": "npm run --workspace=@collab/db db:generate",
+    "db:migrate": "npm run --workspace=@collab/db db:migrate",
+    "db:migrate:deploy": "npm run --workspace=@collab/db db:migrate:deploy",
+    "db:seed": "npm run --workspace=@collab/db db:seed",
+    "dev:api": "npm run --workspace=@collab/api dev",
+    "dev:collab": "npm run --workspace=@collab/collaboration dev",
+    "dev:web": "npm run --workspace=@collab/web dev",
+    "dev": "concurrently --kill-others --names api,collab,web \"npm:dev:api\" \"npm:dev:collab\" \"npm:dev:web\""
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.73.0",
+    "@typescript-eslint/parser": "^8.73.0",
+    "concurrently": "^9.2.5",
+    "eslint": "^10.15.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.8",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  }
+}

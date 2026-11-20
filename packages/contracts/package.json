@@ -1,0 +1,23 @@
+{
+  "name": "@collab/contracts",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Shared Zod schemas, types, and API response contracts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@collab/config": "*",
+    "@types/node": "^20.12.7",
+    "typescript": "^5.4.5"
+  }
+}

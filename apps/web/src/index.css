@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply min-h-screen bg-slate-50 text-slate-800 antialiased;
+  }
+
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+
+  input,
+  select,
+  textarea {
+    @apply transition-colors duration-150;
+  }
+
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  button:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid #059669;
+    outline-offset: 2px;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    @apply rounded-lg border-slate-200;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  select {
+    min-height: 2.75rem;
+  }
+
+  textarea {
+    min-height: 6rem;
+  }
+}
+
+.ui-select {
+  appearance: none;
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+}
+
+.ui-select:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+.tiptap-content {
+  min-height: 12rem;
+  padding: 1.25rem;
+  outline: none;
+}
+
+.tiptap-content > * + * {
+  margin-top: 0.75rem;
+}
+
+.tiptap-content h1,
+.tiptap-content h2,
+.tiptap-content h3 {
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.tiptap-content h1 {
+  font-size: 1.75rem;
+}
+.tiptap-content h2 {
+  font-size: 1.4rem;
+}
+.tiptap-content h3 {
+  font-size: 1.15rem;
+}
+.tiptap-content ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+.tiptap-content ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+.tiptap-content blockquote {
+  border-left: 3px solid #cbd5e1;
+  color: #475569;
+  padding-left: 1rem;
+}
+.tiptap-content pre {
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 1rem;
+}
+.tiptap-content p.is-editor-empty:first-child::before {
+  color: #94a3b8;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+.collaboration-cursor__caret {
+  border-left: 2px solid;
+  border-right: 2px solid;
+  margin-left: -1px;
+  margin-right: -1px;
+  pointer-events: none;
+  position: relative;
+  word-break: normal;
+}
+.collaboration-cursor__label {
+  border-radius: 0.25rem 0.25rem 0.25rem 0;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  left: -2px;
+  line-height: 1;
+  padding: 0.2rem 0.35rem;
+  position: absolute;
+  top: -1.25rem;
+  user-select: none;
+  white-space: nowrap;
+}
