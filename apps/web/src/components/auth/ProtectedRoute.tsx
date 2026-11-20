@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
@@ -8,7 +8,40 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { isAuthenticated, isLoading } = useAuth();
-  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  const isAuthPage = path === "/login" || path === "/register";
+  const isKnownPath = path === "/" || isAuthPage;
+  const [authMode, setAuthMode] = useState<"login" | "register">(
+    path === "/register" ? "register" : "login",
+  );
+
+  useEffect(() => {
+    if (isAuthenticated && isAuthPage) {
+      window.location.replace("/");
+    }
+  }, [isAuthenticated, isAuthPage]);
+
+  if (!isKnownPath) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-slate-100">
+        <section className="w-full max-w-lg">
+          <p className="text-sm text-emerald-300">404 · page not found</p>
+          <h1 className="mt-4 text-3xl font-semibold tracking-tight">
+            We couldn’t find that page.
+          </h1>
+          <p className="mt-3 leading-7 text-slate-300">
+            The link may be out of date, or the page may have moved.
+          </p>
+          <a
+            href="/"
+            className="mt-7 inline-flex rounded-lg bg-white px-5 py-3 font-medium text-slate-950 transition hover:bg-slate-200"
+          >
+            Back to workspace
+          </a>
+        </section>
+      </main>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -19,6 +52,14 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
             Loading your workspace...
           </p>
         </div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated && isAuthPage) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 text-sm text-slate-500">
+        Taking you to your workspace…
       </div>
     );
   }
