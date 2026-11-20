@@ -66,7 +66,9 @@ function setAuthCookies(
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "strict" : "lax",
+    // The web app and API are hosted on different origins in production.
+    // Allow credentialed cross-origin fetches to send the cookie over HTTPS.
+    sameSite: isProd ? "none" : "lax",
     maxAge: 15 * 60 * 1000, // 15 mins
   });
 
@@ -74,7 +76,7 @@ function setAuthCookies(
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: isProd,
-      sameSite: isProd ? "strict" : "lax",
+      sameSite: isProd ? "none" : "lax",
       path: "/api/auth", // Only sent to auth paths
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -86,12 +88,12 @@ function clearAuthCookies(res: Response): void {
   res.clearCookie("accessToken", {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "strict" : "lax",
+    sameSite: isProd ? "none" : "lax",
   });
   res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "strict" : "lax",
+    sameSite: isProd ? "none" : "lax",
     path: "/api/auth",
   });
 }
